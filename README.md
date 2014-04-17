@@ -1,4 +1,4 @@
 lis_chado
 =========
 
-LIS changes of schema and loader scripts from Chado
+Track LIS project's changes of sql schema and data loading scripts from Chado (http://gmod.org/)
