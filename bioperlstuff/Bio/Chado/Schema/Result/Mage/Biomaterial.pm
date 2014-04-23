@@ -280,6 +280,21 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
+=head2 project_biomaterials
+
+Type: has_many
+
+Related object: L<Bio::Chado::Schema::Result::Project::ProjectBiomaterial>
+
+=cut
+
+__PACKAGE__->has_many(
+  "project_biomaterials",
+  "Bio::Chado::Schema::Result::Project::ProjectBiomaterial",
+  { "foreign.biomaterial_id" => "self.biomaterial_id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
 =head2 biomaterial_treatments
 
 Type: has_many
