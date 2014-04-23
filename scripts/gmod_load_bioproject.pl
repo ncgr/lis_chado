@@ -106,6 +106,7 @@ the publication specs are fetched from Entrez (using eUtils) which sets the diff
 
 =item cvterm
 
+=item project_biomaterial
 
 =back
 
@@ -248,7 +249,8 @@ my %seq  = (
     pub_dbxref => 'pub_dbxref_pub_dbxref_id_seq',	
     biomaterial => 'biomaterial_biomaterial_id_seq',
     project_pub => 'project_pub_project_pub_id_seq',
-     );
+    project_biomaterial => 'project_biomaterial_project_biomaterial_id_seq',
+	 );
 
 open (INFILE, "<$infile") || die "can't open file $infile";   #
 open (ERR, ">$infile.err") || die "Can't open the error ($infile.err) file for writing.\n";
@@ -825,7 +827,7 @@ $dbxref_s = $schema->resultset("General::Dbxref")->find_or_create(
 $a = $dbxref_s->get_column('dbxref_id');
 
 $aa = $dbxref_s->get_column('accession');
-$biomaterial_s = $schema->resultset('Mage::Biomaterial')->find_or_new({description => "$desc_s", project_id => $project_id, name => $aa}); #biomaterial name is unique
+$biomaterial_s = $schema->resultset('Mage::Biomaterial')->find_or_new({description => "$desc_s", name => $aa}); #biomaterial name is unique
 unless($biomaterial_s->in_storage) #added by peu
 {
 $biomaterial_s->biosourceprovider_id($c);
@@ -834,6 +836,10 @@ $biomaterial_s->stock_id($stock_id);
 $biomaterial_s->taxon_id($b);
 $biomaterial_s->insert();
 }
+
+my $project_biom = $biomaterial_s->find_or_create_related('project_biomaterials', {project_id => $project_id});
+
+
 foreach my $arra(@getdbx_ids)
 {
 print "Sec dbxref: $arra \n\n";
