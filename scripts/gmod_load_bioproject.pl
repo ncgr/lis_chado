@@ -296,8 +296,6 @@ eval {
 		}
 
 	
-   print "$prjna\n";
-
       my $acc_text =get("http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=bioproject&id=$prjna&rettype=acc&retmode=text");
        chomp $acc_text;
         $acc_text =~ s/(ID:)(\w+)(.*)//g;
@@ -306,7 +304,7 @@ eval {
 	 if ($line1=~ m/(BioProject Accession: )(\w+)(.*)/)
        { 
         $acce = $2;
-	print "Accession is $acce\n";
+	print "Project Accession is $acce\n";
         }
 }
 	if (!$prjna) { next(); }
@@ -322,7 +320,7 @@ eval {
         
 	if(!($project)) { 
 	    $project_count++;
-	    warn "creating new project num $project_count\n";
+	    warn "Creating new project num $project_count\n";
 	    $project = $schema->resultset('Project::Project')->new( {} ) ; 
 	    $contact = $schema->resultset('Contact::Contact')->new( {} );
             $biomaterial = $schema->resultset('Mage::Biomaterial')->new( {} );            
@@ -339,8 +337,7 @@ eval {
 	    $project->insert();
 		my $project_id = $project->get_column('project_id');
                 my $project_acce =  $project->name($acce);
-	    print "Loading project: $project_id: $project_acce\n\n";
-	my @prjcount = ();
+	    	my @prjcount = ();
 	push (@prjcount, $project_acce);
         open FILE, ">", "projects_loaded.txt";	
 	foreach my $x(@prjcount)
@@ -350,14 +347,15 @@ eval {
 	close FILE;
 
 	&fetch_sample($prjna);
-
+	if (defined $cvt2)
+       {	
 	$project->find_or_create_related('projectprops' ,
                                                                 { type_id => $cvt2, value => $method_value});
-
+       }
 
 	
             my $dum = $biomaterial->get_column('name');
-		print "Test biomaterial name is :$dum \n"; 
+		 
             
            if ($contact->in_storage)
 	{
@@ -376,9 +374,13 @@ eval {
  		
 		}
             @publ_ids = ();
-	#	$biomaterial->project_id($project_id);		#to not add project_id for biomaterial   
+	  
            $biomaterial->insert();
 
+	my $biom_for_project = $biomaterial->find_or_create_related('project_biomaterials', 
+											   { project_id => $project_id});											
+
+	
          $project_cvterm->insert();
 	}
 else  {
@@ -467,7 +469,6 @@ sub reset_sequences {
     foreach my $key ( keys %seq ) { 
 	my $value= $seq{$key};
 	my $maxvalue= $maxval{$key} || 0;
-	#print STDERR "$key: $value, $maxvalue \n";
 	if ($maxvalue) { $dbh->do("SELECT setval ('$value', $maxvalue, true)") ;  }
 	else {  $dbh->do("SELECT setval ('$value', 1, false)");  }
     }
@@ -486,11 +487,11 @@ sub fetch_project {
     my $organization_bool = $pt1->exists('//Submission/Description/Organization/Name'); #check for existence of this optional element
     my $organism_bool = $pt1->exists('//ProjectTypeSubmission/Target/Organism/OrganismName');#check for existence of this optional element
     my $data_type_bool = $pt1->exists('//DataType'); #future work ToDo
-
+    my $umbrella_bool = $pt1->exists('//ProjectType/ProjectTypeTopAdmin');
 	
-    print "Org_bool is: $organization_bool\n";
-    print "Organism bool is: $organism_bool\n";
-    print "Data type bool is: $data_type_bool\n";
+   # print "Org_bool is: $organization_bool\n";
+   # print "Organism bool is: $organism_bool\n";
+   # print "Data type bool is: $data_type_bool\n";
 
    my $pub_bool = $pt1->exists('//Project/ProjectDescr/Publication');
    if ($pub_bool == 1)
@@ -606,6 +607,30 @@ my $twig=XML::Twig->new(
 
 }
 
+
+elsif ($umbrella_bool == 1)
+{
+eval 
+{
+	my $twig=XML::Twig->new(
+            
+              twig_handlers   =>
+            {
+                'Project/ProjectDescr/Title'    => \&name_umbrella,
+                 'Project/ProjectDescr/Description'   => \&description,
+                'Submission/Description/Organization/Name' => \&proj_contact,
+               'ProjectTypeTopAdmin/Organism/OrganismName' => \&organism,
+                
+		},
+               
+            pretty_print => 'indented',  # output will be nicely formatted
+            ) || die($!);
+        $twig->parse($project_xml) || die("twig parse failed: " . $!); # build it
+        $twig->print;
+        }       
+}
+
+
 else {
 
 
@@ -719,9 +744,7 @@ my $biosample_xml = get("http://eutils.ncbi.nlm.nih.gov/entrez/eutils/elink.fcgi
     $pt2 = XML::XPath->new(xml => $biosample_xml);
     my $biosample_bool = $pt2->exists('//Link/Id'); #Link/Id is a path in xml of biosample-bioproject eutil linkname
 
-    print "biosample_bool is: $biosample_bool\n";
     
-
     if ($biosample_bool == 1)
         {
         print "Biosample exists for this Project \n\n";
@@ -730,7 +753,7 @@ my $biosample_xml = get("http://eutils.ncbi.nlm.nih.gov/entrez/eutils/elink.fcgi
 	{
 	my $sample_id = $node->string_value; #gets sample id
         print FILE "$sample_id\n";
-	print "$sample_id\n";
+	
        }	
       close FILE;
 
@@ -842,7 +865,7 @@ my $project_biom = $biomaterial_s->find_or_create_related('project_biomaterials'
 
 foreach my $arra(@getdbx_ids)
 {
-print "Sec dbxref: $arra \n\n";
+#print "Sec dbxref: $arra \n\n";
 my $biodbxref = $biomaterial_s->find_or_create_related('biomaterial_dbxrefs', {dbxref_id => $arra});
 
 } 
@@ -855,8 +878,8 @@ foreach  (my $i = 0; $i <= @ele_a-1; $i++ )
 		{
 		my $type_a = $cvta[$i];
 		my $value_a = $ele_a[$i];
-	print "cvta is $cvta[$i] \n\n";
-	print "Insert biomaterialprop with harmonized attribute, type_id=$type_a, value=$value_a \n\n";
+#	print "cvta is $cvta[$i] \n\n";
+#	print "Insert biomaterialprop with harmonized attribute, type_id=$type_a, value=$value_a \n\n";
 
 my $bioprop_a = $biomaterial_s->find_or_create_related('biomaterialprops' ,
                                                             { rank => 0, type_id => $type_a, value => $value_a});
@@ -869,8 +892,8 @@ foreach  (my $i = 0; $i <= @ele_b-1 ; $i++)
     {
 	my $type_b = $cvtb[$i];
                 my $value_b = $ele_b[$i];
-print "cvtb is $cvtb[$i] \n\n";
-print "Insert biomaterialprop with simple attribute name, type_id=$type_b, value=$value_b \n\n";
+#print "cvtb is $cvtb[$i] \n\n";
+#print "Insert biomaterialprop with simple attribute name, type_id=$type_b, value=$value_b \n\n";
 my $bioprop_b = $biomaterial_s->find_or_create_related('biomaterialprops' ,
                                                              { rank => 0, type_id => $type_b, value => $value_b}, {key=> 'biomaterialprop_c1'});
 
@@ -899,7 +922,7 @@ my $species = substr( $org_s, index( $org_s, ' ' ) + 1 );
 my $first = substr($genus, 0, 1);
 my $abbr = "$first.$species";
 
-print "Organism of biosample is $genus $species \n\n";
+#print "Organism of biosample is $genus $species \n\n";
 if ($genus ne "" && $species ne "")
 {
 my $abbr = "$first.$species";
@@ -929,7 +952,7 @@ my ($twig_s, $elt) = @_;
 my $cont_s = $elt->text;
 
 
-print "Contact of biosample is : $cont_s \n\n";
+#print "Contact of biosample is : $cont_s \n\n";
 $contact_s = $schema->resultset('Contact::Contact')->find_or_new({ name => $cont_s});  #contact name is unique
            unless ($contact_s->in_storage) {
                                             print "**Adding new biosample's contact: $cont_s \n\n";
@@ -946,7 +969,7 @@ sub description_s
 {
 my ($twig_s, $elt) = @_;
 $desc_s = $elt->text;
-print "Biomaterial name of biosample is : $desc_s \n\n";
+#print "Biomaterial name of biosample is : $desc_s \n\n";
 $project_id = $project->get_column('project_id');
 
 print "Sample name is : $sample_name \n\n";
@@ -968,11 +991,11 @@ if (defined $attr1 && defined $attr2) #checks if both dict and harmonized name i
 if (($attr1 ne 'strain' || $attr2 ne 'strain') || ($attr1 ne 'cultivar' || $attr2 ne 'cultivar'))
 {
 my $element_a = $elt->text;
-print "Attribue's a-value is : $element_a \n\n";
+#print "Attribue's a-value is : $element_a \n\n";
 $sample_cvterm = $schema->resultset('Cv::Cvterm')->create_with({name=>$attr2, cv=>$attr1});
 my $cv = $sample_cvterm->get_column('cv_id');
 $cvt_a = $sample_cvterm->get_column('cvterm_id');
-print "New attribut created- cv_id: $cv, cvterm_id: $cvt_a";
+#print "New attribut created- cv_id: $cv, cvterm_id: $cvt_a";
 print "Sample attribute is cv:$attr1 cvterm:$attr2 \n\n";
 push(@ele_a, $element_a);
 push(@cvta, $cvt_a);
@@ -994,7 +1017,7 @@ $stock_id = $stock->get_column('stock_id');
 else
 {
 my $element_b = $elt->text;
-print "Attribue's b-value is : $element_b \n\n";
+#print "Attribue's b-value is : $element_b \n\n";
 my $attr3 = $elt->att('attribute_name');
 $sample_cvterm = $schema->resultset('Cv::Cvterm')->create_with({name=>$attr3, cv=>'ncbi_biosample'});
 my $cv = $sample_cvterm->get_column('cv_id');
@@ -1019,8 +1042,8 @@ sub other_dbs{
 
 #db name for secondary dbs for secondary dbxref##
 
-print "Test sec db is : $sec_db \n\n\n";
-print "Test db_label is : $s_name \n\n";
+#print "Test sec db is : $sec_db \n\n\n";
+#print "Test db_label is : $s_name \n\n";
 
 if (defined $sec_db)
 {
@@ -1050,7 +1073,7 @@ if (defined $sec_db)
 			$dbxref_sec->insert();
        } 
        my $dbx_sec = $dbxref_sec->get_column('dbxref_id'); 
-        print "$dbx_sec \n\n";   
+#        print "$dbx_sec \n\n";   
 	 push(@getdbx_ids, $dbx_sec);        
        	
 
@@ -1090,6 +1113,26 @@ sub name
 print "Title of Project is : $title_of_prj";     
  $twig->purge; #frees the memory
  }
+
+
+
+
+sub name_umbrella
+{
+     my ($twig, $elt)= @_;
+     $title_of_prj = $elt->text;
+print "Title of Project is : $title_of_prj";
+
+$project_cvterm = $schema->resultset('Cv::Cvterm')->create_with({name=>'umbrella_project', cv=>'ncbi_project'});
+my $cv_u = $project_cvterm->get_column('cv_id');
+my $cvt_u = $project_cvterm->get_column('cvterm_id');
+
+print "Project type is : $cvt_u \n\n";
+
+ $project->type_id($cvt_u);
+ $twig->purge; #frees the memory
+}
+
 
  
 #sub name {    #COMMENT OUT 	THIS NAME SUB 	to create new name sub for project name having only accession of project eg PRJNAXXXX ###
@@ -1198,7 +1241,7 @@ my ($twig, $elt)= @_;
 my $name = $elt->att('material');
 my $b = $organism->get_column('organism_id');
 
-print "Material organism is: $b \n\n";  
+#print "Material organism is: $b \n\n";  
 
           $biomaterial = $schema->resultset('Mage::Biomaterial')->find_or_new({ name => "$acce-$name"}); #biomaterial name is unique
            unless ($biomaterial->in_storage) {
@@ -1222,7 +1265,7 @@ sub proj_type{
 my ($twig, $elt)= @_;
 my $prj_type = $elt->text;
 
-
+#new error
 $project_cvterm = $schema->resultset('Cv::Cvterm')->create_with({name=>$prj_type, cv=>'ncbi_bioproject'});
 my $cv = $project_cvterm->get_column('cv_id');
  my $cvt = $project_cvterm->get_column('cvterm_id');
@@ -1266,7 +1309,7 @@ my $method_cvterm = $schema->resultset('Cv::Cvterm')->create_with({name=>'method
 $cvt2 = $method_cvterm->get_column('cvterm_id');
 
 print "Method type value is: $method_value \n\n";
-print "Adding new type_id, cvterm for project\n\n";
+#print "Adding new type_id, cvterm for project\n\n";
 
 }
 

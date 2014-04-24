@@ -84,9 +84,7 @@ __PACKAGE__->add_columns(
   { data_type => "text", is_nullable => 1 },
   "description",
   { data_type => "text", is_nullable => 1 },
- "project_id",  #added by peu
-  { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
-"stock_id",   #added by peu
+ "stock_id",   #added by peu
   { data_type => "integer", is_foreign_key => 1, is_nullable => 1},
 
 );
@@ -175,27 +173,6 @@ __PACKAGE__->belongs_to(
   },
 );
 
-=head2 project
-
-Type: belongs_to
-
-Related object: L<Bio::Chado::Schema::Result::Project::Project>
-
-=cut
-
-			  #added by peu
-__PACKAGE__->belongs_to(
-  "project",
-  "Bio::Chado::Schema::Result::Project::Project",
-  { project_id => "project_id" },
-  {
-    cascade_copy   => 0,
-    cascade_delete => 0,
-    is_deferrable  => 1,
-    on_delete      => "CASCADE",
-    on_update      => "CASCADE",
-  },
-);
 
 
 =head2 biosourceprovider
