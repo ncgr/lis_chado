@@ -381,8 +381,13 @@ eval {
 											   { project_id => $project_id});											
 
 	
-         $project_cvterm->insert();
+        #unless ($project_cvterm->in_storage)
+	#{  
+	#$project_cvterm->insert();
+	#}
+
 	}
+
 else  {
             $exists_count++;
             print STDOUT "Project $prjna is already stored in the database. Skipping..\n";
@@ -627,7 +632,7 @@ eval
             ) || die($!);
         $twig->parse($project_xml) || die("twig parse failed: " . $!); # build it
         $twig->print;
-        }       
+        };       
 }
 
 
@@ -1123,9 +1128,9 @@ sub name_umbrella
      $title_of_prj = $elt->text;
 print "Title of Project is : $title_of_prj";
 
-$project_cvterm = $schema->resultset('Cv::Cvterm')->create_with({name=>'umbrella_project', cv=>'ncbi_bioproject'});
-my $cv_u = $project_cvterm->get_column('cv_id');
-my $cvt_u = $project_cvterm->get_column('cvterm_id');
+my $project_cvte = $schema->resultset('Cv::Cvterm')->create_with({name=>'umbrella_project', cv=>'ncbi_bioproject'});
+my $cv_u = $project_cvte->get_column('cv_id');
+my $cvt_u = $project_cvte->get_column('cvterm_id');
 
 print "Project type is : $cvt_u \n\n";
 
