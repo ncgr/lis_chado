@@ -146,20 +146,6 @@ __PACKAGE__->has_many(
 );
 
 
-=head2 biomaterials  #added by peu
-
-Type: has_many
-
-Related object: L<Bio::Chado::Schema::Result::Mage::Biomaterial>
-
-=cut
-
-__PACKAGE__->has_many(
-  "biomaterials",
-  "Bio::Chado::Schema::Result::Mage::Biomaterial",
-  { "foreign.project_id" => "self.project_id" },
-  { cascade_copy => 0, cascade_delete => 0 },
-);
 
 
 =head2 project_pubs
@@ -176,6 +162,23 @@ __PACKAGE__->has_many(
   { "foreign.project_id" => "self.project_id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
+
+=head2 project_biomaterials
+
+Type: has_many
+
+Related object: L<Bio::Chado::Schema::Result::Project::ProjectBiomaterial>
+
+=cut
+
+__PACKAGE__->has_many(   #peu
+  "project_biomaterials",
+  "Bio::Chado::Schema::Result::Project::ProjectBiomaterial",
+  { "foreign.project_id" => "self.project_id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+
 
 =head2 project_relationship_subject_projects
 

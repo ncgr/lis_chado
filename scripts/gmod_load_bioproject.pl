@@ -376,7 +376,7 @@ eval {
  		
 		}
             @publ_ids = ();
-		$biomaterial->project_id($project_id);		   
+	#	$biomaterial->project_id($project_id);		#to not add project_id for biomaterial   
            $biomaterial->insert();
 
          $project_cvterm->insert();
