@@ -1123,7 +1123,7 @@ sub name_umbrella
      $title_of_prj = $elt->text;
 print "Title of Project is : $title_of_prj";
 
-$project_cvterm = $schema->resultset('Cv::Cvterm')->create_with({name=>'umbrella_project', cv=>'ncbi_project'});
+$project_cvterm = $schema->resultset('Cv::Cvterm')->create_with({name=>'umbrella_project', cv=>'ncbi_bioproject'});
 my $cv_u = $project_cvterm->get_column('cv_id');
 my $cvt_u = $project_cvterm->get_column('cvterm_id');
 
