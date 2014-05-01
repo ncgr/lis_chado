@@ -1,0 +1,308 @@
+################################################
+Modifications made in Bio::Chado::Schema table modules    
+################################################
+   							
+-Pooja Umale
+
+Following changes are made in BCS modules and ALTER queries on chado for script gmod_bulk_load_bioproject.pl
+
+This file is only to keep notes of what changes were made. These changes are
+already made in chado and BCS schema under lis_chado git
+________________________________________________________________________________________________
+
+Go to /Bio/Chado/Schema/Result folder to make changes in respective perl module.
+
+PROJECT.PM
+
+__PACKAGE__->add_columns(
+  "project_id",
+  {
+    data_type         => "integer",
+    is_auto_increment => 1,
+    is_nullable       => 0,
+    sequence          => "project_project_id_seq",
+  },
+  "name",
+  { data_type => "varchar", is_nullable => 0, size => 255 },
+  "description",
+  { data_type => "varchar", is_nullable => 0, size => 255 },
+  "dbxref_id", #added by peu
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 0},
+  "type_id",  #added by peu
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 0},
+);
+
+ADD following 
+
+=head2 dbxrefs  #added by peu
+
+Type: has_many
+
+Related object: L<Bio::Chado::Schema::Result::General::Dbxref>
+
+=cut
+
+__PACKAGE__->has_many(
+  "dbxrefs",  #added by peu
+  "Bio::Chado::Schema::Result::General::Dbxref",
+  { "foreign.dbxref_id" => "self.dbxref_id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+
+=head2 biomaterials  #added by peu
+
+Type: has_many
+
+Related object: L<Bio::Chado::Schema::Result::Mage::Biomaterial>
+
+=cut
+
+__PACKAGE__->has_many(
+  "biomaterials",
+  "Bio::Chado::Schema::Result::Mage::Biomaterial",
+  { "foreign.project_id" => "self.project_id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+
+
+=head2 type
+
+Type: belongs_to
+
+Related object: L<Bio::Chado::Schema::Result::Cv::Cvterm>
+
+=cut
+                        #added by peu
+__PACKAGE__->belongs_to(
+  "type",
+  "Bio::Chado::Schema::Result::Cv::Cvterm",
+  { cvterm_id => "type_id" },
+  {
+    cascade_copy   => 0,
+    cascade_delete => 0,
+    is_deferrable  => 1,
+    on_delete      => "CASCADE",
+    on_update      => "CASCADE",
+  },
+);
+
+
+___________________________________________________________________________________________________
+
+DBXREF.PM
+
+add it in Dbxref.pm
+
+__PACKAGE__->has_many(
+  "project", #added by peu
+  "Bio::Chado::Schema::Result::Project::Project",
+  { "foreign.dbxref_id" => "self.dbxref_id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+____________________________________________________________________________________________________
+
+/Result/Mage/BIOMATERIAL.PM
+
+__PACKAGE__->add_columns(
+  "biomaterial_id",
+  {
+    data_type         => "integer",
+    is_auto_increment => 1,
+    is_nullable       => 0,
+    sequence          => "biomaterial_biomaterial_id_seq",
+  },
+  "taxon_id",
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
+  "biosourceprovider_id",
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
+  "dbxref_id",
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
+  "name",
+  { data_type => "text", is_nullable => 1 },
+  "description",
+  { data_type => "text", is_nullable => 1 },
+ "project_id",  #added by peu
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
+"stock_id",   #added by peu
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 1},
+
+);
+
+
+ADD following:
+
+__PACKAGE__->belongs_to(
+  "stock", #added by peu
+  "Bio::Chado::Schema::Result::Stock::Stock",
+  { stock_id => "stock_id" },
+  {
+    cascade_copy   => 0,
+    cascade_delete => 0,
+    is_deferrable  => 1,
+    on_delete      => "CASCADE",
+    on_update      => "CASCADE",
+  },
+);
+
+
+=head2 project
+
+Type: belongs_to
+
+Related object: L<Bio::Chado::Schema::Result::Project::Project>
+
+=cut
+
+                          #added by peu
+__PACKAGE__->belongs_to(
+  "project",
+  "Bio::Chado::Schema::Result::Project::Project",
+  { project_id => "project_id" },
+  {
+    cascade_copy   => 0,
+    cascade_delete => 0,
+    is_deferrable  => 1,
+    on_delete      => "CASCADE",
+    on_update      => "CASCADE",
+  },
+);
+
+
+
+Add following in Result/Cv/CVTERM.PM
+
+__PACKAGE__->has_many(
+  "projects", #added by peu
+  "Bio::Chado::Schema::Result::Project::Project",
+  { "foreign.type_id" => "self.cvterm_id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+Add following in Result/Stock/STOCK.PM
+
+
+
+Add this also (Tell Hrishi to add this in his copy of stock.pm which I forgot to tell him to add the first time)
+
+  =head2 biomaterials
+
+Type: has_many
+
+Related object: L<Bio::Chado::Schema::Result::Mage::Biomaterial>
+
+=cut
+
+__PACKAGE__->has_many(   #added by peu
+  "biomaterials",
+  "Bio::Chado::Schema::Result::Mage::Biomaterial",
+  { "foreign.stock_id" => "self.stock_id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+
+
+SQL queries executed on chado postgres:
+
+
+To add dbxref_id in project table=>
+
+ALTER TABLE project ADD COLUMN dbxref_id integer;
+
+ALTER TABLE project ADD CONSTRAINT "project_dbxref_id_fkey" FOREIGN KEY (dbxref_id) REFERENCES dbxref(dbxref_id) ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED;
+
+
+ALTER TABLE project ALTER COLUMN dbxref_id SET NOT NULL;
+
+
+To add type_id in project table=>
+
+ALTER TABLE project ADD COLUMN type_id integer;  
+
+ALTER TABLE project ADD CONSTRAINT "project_type_id_fkey" FOREIGN KEY (type_id) REFERENCES cvterm(cvterm_id) ON DELETE CASCADE;
+
+
+To change data type for decription column in project table to text=>
+
+ALTER TABLE project ALTER COLUMN description TYPE text;
+
+
+To add stock_id in biomaterial:
+
+ALTER TABLE biomaterial ADD COLUMN stock_id integer; 
+
+ALTER TABLE biomaterial ADD CONSTRAINT "biomaterial_stock_id_fkey" FOREIGN KEY (stock_id) REFERENCES stock(stock_id) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED
+
+Do later-
+ALTER TABLE biomaterial ALTER COLUMN project_id SET NOT NULL;
+
+
+To add project_id in biomaterial:
+
+ALTER TABLE biomaterial ADD COLUMN project_id integer ;
+
+ALTER TABLE biomaterial ADD CONSTRAINT "biomaterial_project_id_fkey" FOREIGN KEY (project_id) REFERENCES project(project_id) ON DELETE CASCADE;
+
+Also make this change in its __PACKAGE____
+
+
+To ADD new table project_biomaterial
+
+ADDed new table project_biomaterial  04/23/2014
+
+>psql ran this on cahdo_123_test_peu
+
+CREATE TABLE project_biomaterial 
+(project_biomaterial_id  serial not null,
+primary key (project_biomaterial_id),
+project_id int not null,
+   FOREIGN KEY (project_id) REFERENCES project(project_id) ON DELETE CASCADE,
+   biomaterial_id int not null,
+  FOREIGN KEY (biomaterial_id) REFERENCES biomaterial(biomaterial_id) ON DELETE CASCADE,
+constraint project_bioamterial_c1 unique (project_id, biomaterial_id)
+);
+
+CREATE INDEX project_biomaterial_idx1 ON project_biomaterial (project_id);
+
+CREATE INDEX project_biomaterial_idx2 ON project_biomaterial (biomaterial_id);
+
+
+
+Add in project.pm
+
+=head2 project_biomaterials
+
+Type: has_many
+
+Related object: L<Bio::Chado::Schema::Result::Project::ProjectBiomaterial>
+
+=cut
+
+__PACKAGE__->has_many(   #peu
+  "project_biomaterials",
+  "Bio::Chado::Schema::Result::Project::ProjectBiomaterial",
+  { "foreign.project_id" => "self.project_id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+
+Add in biomaterial.pm
+
+=head2 project_biomaterials
+
+Type: has_many
+
+Related object: L<Bio::Chado::Schema::Result::Project::ProjectBiomaterial>
+
+=cut
+
+__PACKAGE__->has_many(
+  "project_biomaterials",
+  "Bio::Chado::Schema::Result::Project::ProjectBiomaterial",
+  { "foreign.biomaterial_id" => "self.biomaterial_id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+
