@@ -1,4 +1,4 @@
-This is a documentation for a Perl script gmod_load_project.pl
+This is a documentation for a Perl script gmod_bulk_load_bioproject.pl
 
 BioProject, BioSample and PubMed are NCBI and databases and this script is an attempt to fetch data from BioProject and its related BioSample and PubMed data via its XML parsind and NCBI E-utilities.
 
@@ -131,8 +131,7 @@ ADDITIONAL:
 
 Please refer to SQL query page for looking at the ALTER queries and CREATE TABLE query used to make change in Chado Schema
 
-
-
+More stuff to add...
 
  
 
