@@ -40,7 +40,7 @@ You can add this to the ~/.bash_profile to make it always available when you log
 
 CHADO TABLES
 
-project table:
+1. project table:
 
 Name: Accession of BioProject
 
@@ -54,7 +54,7 @@ Type_id:  It indicates Project data type- A general label indicating the primary
 
 
 
-projectprop table:
+2. projectprop table:
 
 This table is used to store method_type attribute of the project from Project’s Attributes section.
 
@@ -66,15 +66,15 @@ Method: Indicate the general approach used to obtain data.
 
 
 
-contact table:
+3. contact table:
 
 This table is populated with information of Submitter of Project
 
-project_contact table:
+4. project_contact table:
 
 This table links project to its submitter information (contact table)
 
-pub:
+5. pub:
 
 Fetches and Stores PubMed publications cited by its BioProject by calling other script from within this program-
 
@@ -84,18 +84,18 @@ Note: Some projects have publications and some dont.
 
 uniquename in Pub table consist of its PMID and Title in the format "PMID:Title"
 
-project_pub:
+6. project_pub:
 
 This table is a relation between project and its associated publications. 
 
-biomaterial table:
+7. biomaterial table:
 
 This table is important and it is used to store sample's metadata from BioSample database. 
 This script automatically fetches the list of biosamples that are related to a bioproject and then load their metadate from respective XML into biomaterial table and related tables.
-Also, the primary dbxref of a biomaterial is stored in this table for 'BioSample' db in chado. 
+The primary dbxref of a biomaterial is stored in this table for 'BioSample' db in chado. A new column added in this table is stock_id which refers to a strain/cultivar of that sample.
 
 
-biomaterialprop table:
+8. biomaterialprop table:
 
 This table stores all the attributes of a biosample and the cvterms are created for each attribute.
 
@@ -108,32 +108,28 @@ treatment
 source_name 
 etc...
 
-biomaterial_dbxref:
+9. biomaterial_dbxref:
 
 This table is used to store secondary dbxref of a biomaterial that points to a biosample's identifier in databases other than BioSample, like SRA and GEO.
 
-project_biomaterial:
+10. project_biomaterial:
 
 This is a new table created in-house and does not come with Chado schema. It is created for showing a relation or linkage between a project and all of its samples (biomaterials)   
 **Please refer to SQL document to know how a new table is created in chado and its respective BCS module created under /Bio/Chado/Schema directory.
-
  
-stock table:
+11. stock table:
 
+This table is used to store strain/cultivar name of a species for a biomaterial. 
 
+12. cv table:
 
+13. cvterm table:
 
+14. dbxref table: 
 
+ADDITIONAL:
 
-
-
-
-
-
-
-*****Bio::Chado::Schema (To write its location for user to use that copy, and create a seperate doc for all ALTER SQL queries that were run on chado -to add new table and columns)
-
-Input file:
+Please refer to SQL query page for looking at the ALTER queries and CREATE TABLE query used to make change in Chado Schema
 
 
 
