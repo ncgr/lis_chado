@@ -17,9 +17,12 @@ This script is used to parse XML to obtain metadata from NCBI-BioProject and the
 
 Please run following at command-line by providing correct options for database connection-
 
-gmod_load_bioproject.pl -D <chado_database_name> -H <butler> -d Pg -u <user name> -p <password> -i /path/to/input/file_with_Project_UIDs 
+gmod_bulk_load_bioproject.pl -D <chado_database_name> -H <butler> -d Pg -u <user name> -p <password> -i /path/to/input/file_with_Project_UIDs 
 
 Or use -g option if using GMOD profile.
+
+Also, make sure the additional script gmod_bulk_load_pubmed_adf.pl(for publications) which is called by this bioproject script is present in the directory or your path.
+
 
 Input file (-i) :
 
