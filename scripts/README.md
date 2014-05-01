@@ -15,13 +15,17 @@ DATA LOADING
 
 This script is used to parse XML to obtain metadata from NCBI-BioProject and there related BioSample and PubMed data from NCBI.
 
-Please run following at command-line by providing correct options for database connection-
+Please run following at command-line by providing correct options for your database connection-
 
-gmod_bulk_load_bioproject.pl -D <chado_database_name> -H <butler> -d Pg -u <user name> -p <password> -i /path/to/input/file_with_Project_UIDs 
+	gmod_bulk_load_bioproject.pl -D chado_database_name -H butler -d database_driver -u user_name -p password -i /path/to/input/file_with_Project_UIDs 
 
-Or use -g option if using GMOD profile.
+We are currently using final database named 'chado_with_goa_and_project' which is the latest and updated copy of our chado database content.
 
-Also, make sure the additional script gmod_bulk_load_pubmed_adf.pl(for publications) which is called by this bioproject script is present in the directory or your path.
+	To load data : gmod_bulk_load_bioproject.pl -D chado_with_goa_and_project -H butler -d Pg -u user_name -p password -i /path/to/input/file_with_Project_UIDs
+
+Or use -g option for database connection if using GMOD profile.
+
+IMPORTANT: Also, make sure the additional script gmod_bulk_load_pubmed_adf.pl(for publications) which is called by this bioproject script is present in the directory or your path.
 
 
 Input file (-i) :
@@ -97,7 +101,6 @@ This table is important and it is used to store sample's metadata from BioSample
 This script automatically fetches the list of biosamples that are related to a bioproject and then load their metadate from respective XML into biomaterial table and related tables.
 The primary dbxref of a biomaterial is stored in this table for 'BioSample' db in chado. A new column added in this table is stock_id which refers to a strain/cultivar of that sample.
 
-
 8. biomaterialprop table:
 
 This table stores all the attributes of a biosample and the cvterms are created for each attribute.
@@ -109,7 +112,7 @@ age
 genotype
 treatment
 source_name 
-etc...
+etc.
 
 9. biomaterial_dbxref:
 
