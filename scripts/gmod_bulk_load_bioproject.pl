@@ -506,7 +506,7 @@ sub fetch_project {
 	
 	#system call to an external perl script to load publications data from PubMed into 'pub' table of Chado#
 	#IMPORTANT: Make sure this script named 'gmod_bulk_load_pubmed_adf.pl' is always present in the directory when running this code 
-	system ("gmod_bulk_load_pubmed_adf.pl -D chado_123_test_peu -H butler -d Pg -u peu -p changeme -i ./pubids.txt -v");
+	system ("gmod_bulk_load_pubmed_adf.pl -D chado_with_goa_and_project -H butler -d Pg -u adf -p changeme -i ./pubids.txt -v");
         my $query1 = "SELECT pub_id FROM pub_dbxref where dbxref_id IN (select dbxref_id from dbxref where accession='$pubid')"; 
 	my $sth1;
 	$sth1=$dbh->prepare($query1);
