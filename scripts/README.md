@@ -30,7 +30,9 @@ We are currently using final database named 'chado_with_goa_and_project' which i
 
 Or use -g option for database connection if using GMOD profile.
 
-### IMPORTANT: Also, make sure the additional script gmod_bulk_load_pubmed_adf.pl(for publications) which is called by this bioproject script is present in the directory or your path.
+### Important 
+
+Also, make sure the additional script gmod_bulk_load_pubmed_adf.pl(for publications) which is called by this bioproject script is present in the directory or your path.
 
 
 ### Input file (-i)
