@@ -3,7 +3,7 @@ Synopsis
 
 This is a documentation for a Perl script gmod_bulk_load_bioproject.pl
 
-BioProject, BioSample and PubMed are NCBI databases and this script is an attempt to fetch data from BioProject and its related BioSample and PubMed data via its XML parsind and NCBI E-utilities.
+BioProject, BioSample and PubMed are NCBI databases and this script is an attempt to fetch data from BioProject and its related BioSample and PubMed data by parsing its XML and using NCBI E-utilities.
 
 Currently, it is used to load Primary Submission Type projects and future work will involve loading of Umbrella Type projects.
 
@@ -37,17 +37,24 @@ Or use -g option for database connection if using GMOD profile.
 
 Input file is a simple text file with list of UIDs of BioProject that you want to load in database in numeric format- For example: 178155
 
-(Please note: BioProject accessions come in three flavor PRJNA/PRJDB/PRJEB. While UID for accessions beginning with PRJNA are same, they differ for project starting with PRJDB or PRJEB, that is why we have decided to use only UIDs in the input file)
+(Please note: BioProject accessions comes in three flavor PRJNA/PRJDB/PRJEB. While UID for accessions beginning with PRJNA are same, they differ for project starting with PRJDB or PRJEB, that is why we have decided to use only UIDs in the input file for correctness)
 
 
 ### Bio::Chado::Schema
 
-For using this script you will need modified version of BCS which is located in the directory 
+Add this to PATH of ~/.bash_profile /sw/tools/git/cv/bin
+
+For using this script you will need modified version of BCS which is located in this git directory /lis_chado/bioperlstuff.
+
+Add the path of your git clone directory before /lis_chado/bioperlstuff and add it to  ~/.bash_profile. For eg. /home/peu/my_git_dir/lis_chado/bioperlstuff
+
+After these two changes to set your paths, source your bash profile by running this . ~/.bash_profile
 
 You can either export it-
-export PERL5LIB=/home/peu/git_chado_peu/lis_chado/bioperlstuff
+export PERL5LIB=/path_to_your_home_git/lis_chado/bioperlstuff
+
 OR
-You can add this to the ~/.bash_profile to make it always available when you log-in.
+You can add them to the ~/.bash_profile to make it always available when you log-in.
 
 
 ## CHADO TABLES
