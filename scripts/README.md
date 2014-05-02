@@ -1,8 +1,13 @@
+Synopsis
+========
+
 This is a documentation for a Perl script gmod_bulk_load_bioproject.pl
 
-BioProject, BioSample and PubMed are NCBI and databases and this script is an attempt to fetch data from BioProject and its related BioSample and PubMed data via its XML parsind and NCBI E-utilities.
+BioProject, BioSample and PubMed are NCBI databases and this script is an attempt to fetch data from BioProject and its related BioSample and PubMed data via its XML parsind and NCBI E-utilities.
 
-RESOURCES:
+Currently, it is used to load Primary Submission Type projects and future work will involve loading of Umbrella Type projects.
+
+## RESOURCES
 
 1] Glossary help for BioProject available at: https://www.ncbi.nlm.nih.gov/books/NBK54364/
 
@@ -11,7 +16,7 @@ RESOURCES:
 3] Entrez e-utils: http://www.ncbi.nlm.nih.gov/books/NBK25501/
 
 
-DATA LOADING
+## DATA LOADING
 
 This script is used to parse XML to obtain metadata from NCBI-BioProject and there related BioSample and PubMed data from NCBI.
 
@@ -25,17 +30,17 @@ We are currently using final database named 'chado_with_goa_and_project' which i
 
 Or use -g option for database connection if using GMOD profile.
 
-IMPORTANT: Also, make sure the additional script gmod_bulk_load_pubmed_adf.pl(for publications) which is called by this bioproject script is present in the directory or your path.
+### IMPORTANT: Also, make sure the additional script gmod_bulk_load_pubmed_adf.pl(for publications) which is called by this bioproject script is present in the directory or your path.
 
 
-Input file (-i) :
+### Input file (-i)
 
 Input file is a simple text file with list of UIDs of BioProject that you want to load in database in numeric format- For example: 178155
 
 (Please note: BioProject accessions come in three flavor PRJNA/PRJDB/PRJEB. While UID for accessions beginning with PRJNA are same, they differ for project starting with PRJDB or PRJEB, that is why we have decided to use only UIDs in the input file)
 
 
-Bio::Chado::Schema :
+### Bio::Chado::Schema
 
 For using this script you will need modified version of BCS which is located in the directory 
 
@@ -45,9 +50,9 @@ OR
 You can add this to the ~/.bash_profile to make it always available when you log-in.
 
 
-CHADO TABLES
+## CHADO TABLES
 
-1. project table:
+### project table:
 
 Name: Accession of BioProject
 
@@ -61,7 +66,7 @@ Type_id:  It indicates Project data type- A general label indicating the primary
 
 
 
-2. projectprop table:
+### projectprop table
 
 This table is used to store method_type attribute of the project from Project’s Attributes section.
 
@@ -73,15 +78,15 @@ Method: Indicate the general approach used to obtain data.
 
 
 
-3. contact table:
+### contact table
 
 This table is populated with information of Submitter of Project
 
-4. project_contact table:
+### project_contact table
 
 This table links project to its submitter information (contact table)
 
-5. pub:
+### pub table
 
 Fetches and Stores PubMed publications cited by its BioProject by calling other script from within this program-
 
@@ -91,17 +96,17 @@ Note: Some projects have publications and some dont.
 
 uniquename in Pub table consist of its PMID and Title in the format "PMID:Title"
 
-6. project_pub:
+### project_pub
 
 This table is a relation between project and its associated publications. 
 
-7. biomaterial table:
+### biomaterial table
 
 This table is important and it is used to store sample's metadata from BioSample database. 
 This script automatically fetches the list of biosamples that are related to a bioproject and then load their metadate from respective XML into biomaterial table and related tables.
 The primary dbxref of a biomaterial is stored in this table for 'BioSample' db in chado. A new column added in this table is stock_id which refers to a strain/cultivar of that sample.
 
-8. biomaterialprop table:
+### biomaterialprop table
 
 This table stores all the attributes of a biosample and the cvterms are created for each attribute.
 
@@ -114,26 +119,31 @@ treatment
 source_name 
 etc.
 
-9. biomaterial_dbxref:
+### biomaterial_dbxref:
 
 This table is used to store secondary dbxref of a biomaterial that points to a biosample's identifier in databases other than BioSample, like SRA and GEO.
 
-10. project_biomaterial:
+### project_biomaterial
 
 This is a new table created in-house and does not come with Chado schema. It is created for showing a relation or linkage between a project and all of its samples (biomaterials)   
 **Please refer to SQL document to know how a new table is created in chado and its respective BCS module created under /Bio/Chado/Schema directory.
  
-11. stock table:
+### stock table:
 
-This table is used to store strain/cultivar name of a species for a biomaterial. 
+This table is used to store strain/cultivar name of a species for a biomaterial(sample). 
 
-12. cv table:
+### cv table
+A Controlled Vocabulary entry is automatically made for 'ncbi_bioproject' by this script
 
-13. cvterm table:
+### cvterm table
+cvterms are created and stored for attributes of biosample. For example: tissue
 
-14. dbxref table: 
+### dbxref table 
+This table is used to store all accessions
 
-ADDITIONAL:
+
+
+## ADDITIONAL
 
 Please refer to SQL query page for looking at the ALTER queries and CREATE TABLE query used to make change in Chado Schema
 
