@@ -207,7 +207,7 @@ __PACKAGE__->has_many(   #added by peu
 SQL queries executed on chado postgres:
 
 
-To add dbxref_id in project table=>
+--To add dbxref_id in project table=>
 
 ALTER TABLE project ADD COLUMN dbxref_id integer;
 
@@ -217,42 +217,39 @@ ALTER TABLE project ADD CONSTRAINT "project_dbxref_id_fkey" FOREIGN KEY (dbxref_
 ALTER TABLE project ALTER COLUMN dbxref_id SET NOT NULL;
 
 
-To add type_id in project table=>
+--To add type_id in project table=>
 
 ALTER TABLE project ADD COLUMN type_id integer;  
 
 ALTER TABLE project ADD CONSTRAINT "project_type_id_fkey" FOREIGN KEY (type_id) REFERENCES cvterm(cvterm_id) ON DELETE CASCADE;
 
 
-To change data type for decription column in project table to text=>
+--To change data type for decription column in project table to text=>
 
 ALTER TABLE project ALTER COLUMN description TYPE text;
 
 
-To add stock_id in biomaterial:
+--To add stock_id in biomaterial:
 
 ALTER TABLE biomaterial ADD COLUMN stock_id integer; 
 
 ALTER TABLE biomaterial ADD CONSTRAINT "biomaterial_stock_id_fkey" FOREIGN KEY (stock_id) REFERENCES stock(stock_id) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED
 
-Do later-
+--Do later-
 ALTER TABLE biomaterial ALTER COLUMN project_id SET NOT NULL;
 
 
-To add project_id in biomaterial:
+--To add project_id in biomaterial:
 
 ALTER TABLE biomaterial ADD COLUMN project_id integer ;
 
 ALTER TABLE biomaterial ADD CONSTRAINT "biomaterial_project_id_fkey" FOREIGN KEY (project_id) REFERENCES project(project_id) ON DELETE CASCADE;
 
-Also make this change in its __PACKAGE____
+--Also make this change in its __PACKAGE____
 
 
-To ADD new table project_biomaterial
+--To ADD new table project_biomaterial
 
-ADDed new table project_biomaterial  04/23/2014
-
->psql ran this on cahdo_123_test_peu
 
 CREATE TABLE project_biomaterial 
 (project_biomaterial_id  serial not null,
