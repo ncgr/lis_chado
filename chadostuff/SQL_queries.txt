@@ -266,6 +266,9 @@ CREATE INDEX project_biomaterial_idx1 ON project_biomaterial (project_id);
 CREATE INDEX project_biomaterial_idx2 ON project_biomaterial (biomaterial_id);
 
 
+--new index for phylonode to help performance when deleting trees
+
+CREATE INDEX phylonode_idx1 on phylonode (parent_phylonode_id);
 
 Add in project.pm
 
